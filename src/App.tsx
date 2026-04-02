@@ -1,36 +1,47 @@
-import { useState } from "react";
-import { ProductSearch } from "./components/ProductSearch";
-import { PriceComparisonGrid } from "./components/PriceComparisonGrid";
-import { getProductPrices } from "./utils/products";
-import { ShoppingCart } from "lucide-react";
+import React, { useState } from 'react';
+import { ShoppingCart } from 'lucide-react';
+import ProductSearch from './components/ProductSearch';
+import PriceComparisonGrid from './components/PriceComparisonGrid';
+// Step 1-la namma create panna data-vai inga import pandrom
+import { PRODUCTS, PRICE_DATA } from './utils/products';
 
 function App() {
-  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string } | null>(null);
-  const [priceData, setPriceData] = useState(getProductPrices("1"));
+  const [priceData, setPriceData] = useState<any[]>([]);
 
-  const handleSearch = (productId: string, productName: string) => {
-    setSelectedProduct({ id: productId, name: productName });
-    const data = getProductPrices(productId);
-    setPriceData(data);
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setPriceData([]);
+      return;
+    }
+
+    // 1. Search pandra name match aagura products-ai edukkum
+    const matchedProducts = PRODUCTS.filter(p => 
+      p.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    // 2. Match aana products-oda price list-ai PRICE_DATA-vula irundhu edukkum
+    const results = matchedProducts.map(p => PRICE_DATA[p.id]).filter(Boolean);
+
+    setPriceData(results);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 text-white p-2 rounded-lg">
-              <ShoppingCart className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">GrocerCompare UK</h1>
-              <p className="text-sm text-gray-500">Compare grocery prices instantly</p>
-            </div>
+      <header className="bg-white shadow-sm p-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="text-blue-600" />
+            <h1 className="text-xl font-bold">PriceWise</h1>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-bold mb-2">Compare Prices Instantly</h2>
+          <p className="text-gray-600">Find the best deals across all supermarkets</p>
+        </div>
+
         <div className="mb-8">
           <ProductSearch onSearch={handleSearch} />
         </div>
@@ -39,22 +50,6 @@ function App() {
           <PriceComparisonGrid data={priceData} />
         </div>
       </main>
-
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <p>© 2024 GrocerCompare UK. Helping you save money on groceries.</p>
-            <div className="flex items-center gap-4">
-              <span>Tesco</span>
-              <span>Sainsbury's</span>
-              <span>Asda</span>
-              <span>Morrisons</span>
-              <span>Aldi</span>
-              <span>Lidl</span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
